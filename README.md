@@ -31,3 +31,4 @@ type USER struct {
 ```
 
 ## License
+Released under the MIT license [MIT license](https://github.com/jakseer/any2struct/blob/master/LICENSE)
