@@ -1,14 +1,21 @@
 package convert
 
-type GoStruct struct {
-	Name   string
-	Fields []GoStructField
+type Struct struct {
+	Name    string
+	Comment string
+	Fields  []StructField
 }
 
-type GoStructField struct {
-	Name    string
-	Type    FieldType
+type StructField struct {
+	Key     string
+	Typ     FieldType
+	Tags    []StructFieldTag
 	Comment string
+}
+
+type StructFieldTag struct {
+	Typ     string
+	Content string
 }
 
 type FieldType string

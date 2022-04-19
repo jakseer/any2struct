@@ -1,13 +1,14 @@
 package json
 
 import (
-	"fmt"
 	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
 	"github.com/jakseer/any2struct/destination"
 )
 
 // the struct with json tag
+
+const tagType = "json"
 
 var _ destination.Destination = &Destination{}
 
@@ -17,15 +18,14 @@ func New() *Destination {
 	return &Destination{}
 }
 
-func (d Destination) Convert(s *convert.GoStruct) string {
-
-	ret := fmt.Sprintf("type %s struct {\n", s.Name)
-	for _, field := range s.Fields {
-		s := fmt.Sprintf("%s\t%s\t\t`json:\"%s\"`\t// %s",
-			strcase.ToCamel(field.Name), field.Type, field.Name, field.Comment)
-		ret = ret + "\t" + s + "\n"
+func (d Destination) Convert(s *convert.Struct) *convert.Struct {
+	for i, _ := range s.Fields {
+		tagContent := strcase.ToSnake(s.Fields[i].Key)
+		s.Fields[i].Tags = append(s.Fields[i].Tags, convert.StructFieldTag{
+			Typ:     tagType,
+			Content: tagContent,
+		})
 	}
-	ret += "}"
 
-	return ret
+	return s
 }
