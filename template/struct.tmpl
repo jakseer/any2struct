@@ -1,0 +1,13 @@
+{{- /* struct-template */ -}}
+{{if .Comment -}} // {{.Name}} {{.Comment}} {{- end}}
+type {{.Name}} struct { {{range .Fields}}
+    {{.Key}} {{.Typ}} {{template "tags" .Tags}} {{if .Comment}}// {{.Comment}}{{end}}
+{{- end}}
+}
+
+{{- /* tags-template */ -}}
+{{define "tags" -}}
+{{if .}}`{{range . -}}
+{{.Typ}}:"{{.Content}}"
+{{- end}}`{{end}}
+{{- end}}

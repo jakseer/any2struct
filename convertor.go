@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"github.com/jakseer/any2struct/destination"
 	"github.com/jakseer/any2struct/destination/json"
 	"github.com/jakseer/any2struct/source"
 	"github.com/jakseer/any2struct/source/sql"
+	"text/template"
 )
 
 const (
@@ -21,8 +23,14 @@ var (
 	// ErrInvalidEncodeType invalid encode type
 	ErrInvalidEncodeType = errors.New("invalid encode type")
 
-	// ErrDecodeError decode error
-	ErrDecodeError = errors.New("decode error")
+	// ErrDecode decode error
+	ErrDecode = errors.New("decode error")
+
+	// ErrLoadTmpl load template
+	ErrLoadTmpl = errors.New("load template")
+
+	// ErrParseTmpl parse template
+	ErrParseTmpl = errors.New("parse template")
 )
 
 func Convert(input string, decodeType string, encodeType string) (string, error) {
@@ -44,10 +52,24 @@ func Convert(input string, decodeType string, encodeType string) (string, error)
 		return "", ErrInvalidEncodeType
 	}
 
-	gs, err := decoder.Convert(input)
+	s, err := decoder.Convert(input)
 	if err != nil {
-		return "", ErrDecodeError
+		return "", ErrDecode
 	}
 
-	return encoder.Convert(gs), nil
+	s = encoder.Convert(s)
+
+	// print using template
+	tmpl, err := template.ParseFiles("./template/struct.tmpl")
+	if err != nil {
+		return "", ErrLoadTmpl
+	}
+
+	b := bytes.Buffer{}
+	err = tmpl.Execute(&b, s)
+	if err != nil {
+		return "", ErrParseTmpl
+	}
+
+	return b.String(), nil
 }
