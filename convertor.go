@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/jakseer/any2struct/destination"
+	"github.com/jakseer/any2struct/destination/gorm"
 	"github.com/jakseer/any2struct/destination/json"
 	"github.com/jakseer/any2struct/source"
 	"github.com/jakseer/any2struct/source/sql"
@@ -11,9 +12,10 @@ import (
 )
 
 const (
-	EncodeTypeSQL string = "encode_sql"
+	DecodeTypeSQL string = "decode_sql"
 
-	DecodeTypeJson string = "decode_json"
+	EncodeTypeJson string = "encode_json"
+	EncodeTypeGorm string = "encode_gorm"
 )
 
 var (
@@ -33,33 +35,38 @@ var (
 	ErrParseTmpl = errors.New("parse template")
 )
 
-func Convert(input string, decodeType string, encodeType string) (string, error) {
+func Convert(input string, decodeType string, encodeTypes []string) (string, error) {
 	var decoder source.Source
-
 	switch decodeType {
-	case DecodeTypeJson:
+	case DecodeTypeSQL:
 		decoder = sql.New()
 	default:
 		return "", ErrInvalidDecodeType
 	}
 
-	var encoder destination.Destination
-
-	switch encodeType {
-	case EncodeTypeSQL:
-		encoder = json.New()
-	default:
-		return "", ErrInvalidEncodeType
+	var encoders []destination.Destination
+	for _, v := range encodeTypes {
+		switch v {
+		case EncodeTypeJson:
+			encoders = append(encoders, json.New())
+		case EncodeTypeGorm:
+			encoders = append(encoders, gorm.New())
+		default:
+			return "", ErrInvalidEncodeType
+		}
 	}
 
+	// parse input
 	s, err := decoder.Convert(input)
 	if err != nil {
 		return "", ErrDecode
 	}
 
-	s = encoder.Convert(s)
+	// build tag and generate output with template
+	for _, encoder := range encoders {
+		s = encoder.Convert(s)
+	}
 
-	// print using template
 	tmpl, err := template.ParseFiles("./template/struct.tmpl")
 	if err != nil {
 		return "", ErrLoadTmpl
