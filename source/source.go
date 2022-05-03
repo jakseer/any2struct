@@ -6,5 +6,5 @@ import "github.com/jakseer/any2struct/convert"
 
 type Source interface {
 	// Convert string to inner struct
-	Convert(string) (*convert.Struct,error)
+	Convert(string) (*convert.Struct, error)
 }

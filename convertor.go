@@ -3,18 +3,19 @@ package main
 import (
 	"bytes"
 	"errors"
+	"text/template"
+
 	"github.com/jakseer/any2struct/destination"
 	"github.com/jakseer/any2struct/destination/gorm"
 	"github.com/jakseer/any2struct/destination/json"
 	"github.com/jakseer/any2struct/source"
 	"github.com/jakseer/any2struct/source/sql"
-	"text/template"
 )
 
 const (
 	DecodeTypeSQL string = "decode_sql"
 
-	EncodeTypeJson string = "encode_json"
+	EncodeTypeJSON string = "encode_json"
 	EncodeTypeGorm string = "encode_gorm"
 )
 
@@ -47,7 +48,7 @@ func Convert(input string, decodeType string, encodeTypes []string) (string, err
 	var encoders []destination.Destination
 	for _, v := range encodeTypes {
 		switch v {
-		case EncodeTypeJson:
+		case EncodeTypeJSON:
 			encoders = append(encoders, json.New())
 		case EncodeTypeGorm:
 			encoders = append(encoders, gorm.New())

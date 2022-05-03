@@ -2,6 +2,7 @@ package gorm
 
 import (
 	"fmt"
+
 	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
 	"github.com/jakseer/any2struct/destination"
@@ -20,7 +21,7 @@ func New() *Destination {
 }
 
 func (d Destination) Convert(s *convert.Struct) *convert.Struct {
-	for i, _ := range s.Fields {
+	for i := range s.Fields {
 		tagContent := fmt.Sprintf("column:%s", strcase.ToSnake(s.Fields[i].Key))
 		s.Fields[i].Tags = append(s.Fields[i].Tags, convert.StructFieldTag{
 			Typ:     tagType,

@@ -2,6 +2,7 @@ package sql
 
 import (
 	"errors"
+
 	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
 	"github.com/jakseer/any2struct/source"
@@ -27,7 +28,6 @@ func New() *Source {
 }
 
 func (s Source) Convert(sql string) (*convert.Struct, error) {
-
 	stmtTree, err := sqlparser.ParseStrictDDL(sql)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (s Source) Convert(sql string) (*convert.Struct, error) {
 	for _, field := range ddlTree.TableSpec.Columns {
 		goStruct.Fields = append(goStruct.Fields, convert.StructField{
 			Key:     strcase.ToCamel(field.Name.String()),
-			Typ:     parseSqlType(field.Type.Type),
+			Typ:     parseSQLType(field.Type.Type),
 			Comment: string(field.Type.Comment.Val),
 		})
 	}
@@ -57,7 +57,7 @@ func (s Source) Convert(sql string) (*convert.Struct, error) {
 	return goStruct, nil
 }
 
-func parseSqlType(sqlType string) convert.FieldType {
+func parseSQLType(sqlType string) convert.FieldType {
 	switch sqlType {
 	case "int":
 		return convert.Int
