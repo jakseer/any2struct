@@ -14,7 +14,7 @@ Convert anything to Go struct
 	sql = sql + "PRIMARY KEY(`id`)" + "\n"
 	sql = sql + ")ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='user table';" + "\n"
     
-	out, err := Convert(sql, DecodeTypeJson, EncodeTypeSQL)
+	out, err := Convert(sql, DecodeTypeJson, []string{EncodeTypeJson, EncodeTypeGorm})
 	if err != nil {
 		fmt.Println(out)
 	}
@@ -22,11 +22,11 @@ Convert anything to Go struct
 
 The output is :
 ```text
-type USER struct {
-        Id      int             `json:"id"`     // primary key
-        Name    string          `json:"name"`   // name
-        CreatedAt       unknown         `json:"created_at"`     // create time
-        DeletedAt       unknown         `json:"deleted_at"`     // delete time
+type USER struct { 
+    Id int `json:"id" gorm:"column:id"` // primary key
+    Name string `json:"name" gorm:"column:name"` // name
+    CreatedAt unknown `json:"created_at" gorm:"column:created_at"` // create time
+    DeletedAt unknown `json:"deleted_at" gorm:"column:deleted_at"` // delete time
 }
 ```
 
