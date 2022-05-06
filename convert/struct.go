@@ -23,5 +23,8 @@ type FieldType string
 const (
 	Unknown FieldType = "unknown"
 	Int     FieldType = "int"
+	Int64   FieldType = "int64"
+	Float64 FieldType = "float64"
 	String  FieldType = "string"
+	Bool    FieldType = "bool"
 )
