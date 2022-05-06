@@ -1,4 +1,4 @@
-package main
+package any2struct
 
 import (
 	"bytes"
@@ -9,11 +9,13 @@ import (
 	"github.com/jakseer/any2struct/destination/gorm"
 	"github.com/jakseer/any2struct/destination/json"
 	"github.com/jakseer/any2struct/source"
+	json2 "github.com/jakseer/any2struct/source/json"
 	"github.com/jakseer/any2struct/source/sql"
 )
 
 const (
-	DecodeTypeSQL string = "decode_sql"
+	DecodeTypeSQL  string = "decode_sql"
+	DecodeTypeJSON string = "decode_json"
 
 	EncodeTypeJSON string = "encode_json"
 	EncodeTypeGorm string = "encode_gorm"
@@ -41,6 +43,8 @@ func Convert(input string, decodeType string, encodeTypes []string) (string, err
 	switch decodeType {
 	case DecodeTypeSQL:
 		decoder = sql.New()
+	case DecodeTypeJSON:
+		decoder = json2.New()
 	default:
 		return "", ErrInvalidDecodeType
 	}
