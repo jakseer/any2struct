@@ -1,12 +1,12 @@
 package destination
 
 import (
-	"github.com/jakseer/any2struct/convert"
+	template2 "github.com/jakseer/any2struct/template"
 )
 
 // convert GoStruct to specified struct string
 
 type Destination interface {
 	// Convert generate struct tag according convert.Struct.Fields
-	Convert(*convert.Struct) *convert.Struct
+	Convert(*template2.Struct) *template2.Struct
 }

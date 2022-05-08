@@ -12,6 +12,9 @@ import (
 var (
 	// ErrInvalidJSONType invalid json type
 	ErrInvalidJSONType = errors.New("invalid json type")
+
+	// ErrInvalidJSONNestedStructure invalid json nested structure
+	ErrInvalidJSONNestedStructure = errors.New("invalid json nested structure")
 )
 
 const (
@@ -34,12 +37,21 @@ func (s Source) Convert(str string) (*convert.Struct, error) {
 		return nil, err
 	}
 
-	ret := &convert.Struct{
-		Name:    defaultStructName,
-		Comment: "",
-		Fields:  nil,
-	}
+	// 判断是数组还是struct，然后
 
+	ss, err := parseJSONStruct(m)
+	if err != nil {
+		return nil, err
+	}
+	ss.Name = defaultStructName
+
+	return ss, nil
+}
+
+func parseJSONStruct(m map[string]interface{}) (*convert.Struct, error) {
+	ret := &convert.Struct{
+		Fields: nil,
+	}
 	for k, v := range m {
 		if field, err := parseJSONField(k, v); err == nil {
 			ret.Fields = append(ret.Fields, *field)
@@ -50,26 +62,43 @@ func (s Source) Convert(str string) (*convert.Struct, error) {
 }
 
 func parseJSONField(key string, val interface{}) (*convert.StructField, error) {
-	var fieldType convert.FieldType
+	var fieldType convert.FieldTyp
 
 	switch val.(type) {
 	case json.Number:
 		n, _ := val.(json.Number)
 		if _, err := n.Int64(); err == nil {
-			fieldType = convert.Int64
+			fieldType = convert.FieldTyp{
+				Typ: convert.Int64,
+			}
 			break
 		}
 		if _, err := n.Float64(); err == nil {
-			fieldType = convert.Float64
+			fieldType = convert.FieldTyp{
+				Typ: convert.Float64,
+			}
 			break
 		}
-		fieldType = convert.String
+		fieldType = convert.FieldTyp{
+			Typ: convert.String,
+		}
 	case bool:
-		fieldType = convert.Bool
+		fieldType = convert.FieldTyp{
+			Typ: convert.Bool,
+		}
 	case []interface{}:
 		return nil, ErrInvalidJSONType
 	case map[string]interface{}:
-		return nil, ErrInvalidJSONType
+		s, err := parseJSONStruct(val.(map[string]interface{}))
+		s.Name = key
+		if err != nil {
+			return nil, ErrInvalidJSONNestedStructure
+		}
+
+		fieldType = convert.FieldTyp{
+			Ptr: s,
+			Typ: convert.StructTyp,
+		}
 	default:
 		return nil, ErrInvalidJSONType
 	}
