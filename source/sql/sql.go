@@ -57,13 +57,19 @@ func (s Source) Convert(sql string) (*convert.Struct, error) {
 	return goStruct, nil
 }
 
-func parseSQLType(sqlType string) convert.FieldType {
+func parseSQLType(sqlType string) convert.FieldTyp {
 	switch sqlType {
 	case "int":
-		return convert.Int
+		return convert.FieldTyp{
+			Typ: convert.Int,
+		}
 	case "varchar":
-		return convert.String
+		return convert.FieldTyp{
+			Typ: convert.String,
+		}
 	default:
-		return convert.Unknown
+		return convert.FieldTyp{
+			Typ: convert.Unknown,
+		}
 	}
 }
