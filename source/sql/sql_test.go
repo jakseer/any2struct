@@ -1,9 +1,10 @@
 package sql
 
 import (
-	"github.com/jakseer/any2struct/convert"
 	"reflect"
 	"testing"
+
+	"github.com/jakseer/any2struct/convert"
 )
 
 func TestSource_Convert(t *testing.T) {
