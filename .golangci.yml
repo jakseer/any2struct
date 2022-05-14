@@ -21,7 +21,7 @@ linters:
     - gomnd
     - gocyclo
     - ineffassign
-    - lll
+  #  - lll
     - prealloc
     - revive
     - staticcheck
