@@ -1,10 +1,26 @@
 # Any2struct
-Convert anything to Go struct
+Convert anything to Go Struct
 
 ## Feature
-- Parse SQL and generate Json struct
+Parse string with certain encoding format into Go Struct with specified tag.
+
+Support parsing encoding format
+- JSON
+- SQL
+- XML
+
+Support output Go Struct Tag
+- JSON
+- Gorm
+- XML
 
 ## Usage
+```
+Convert(input string, decodeType string, encodeTypes []string) (string, error)
+```
+Parse `input` which is `decodeType` type into Go Struct with `encodeTypes` tags.
+
+### Example
 ```go
 	sql := "CREATE TABLE `USER`(" + "\n"
 	sql = sql + "`id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'primary key'," + "\n"
@@ -14,13 +30,14 @@ Convert anything to Go struct
 	sql = sql + "PRIMARY KEY(`id`)" + "\n"
 	sql = sql + ")ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='user table';" + "\n"
     
+	// parse json to go struct with tag gorm and json
 	out, err := Convert(sql, DecodeTypeJson, []string{EncodeTypeJson, EncodeTypeGorm})
 	if err != nil {
 		fmt.Println(out)
 	}
 ```
 
-The output is :
+The stdout is :
 ```text
 type USER struct { 
     Id int `json:"id" gorm:"column:id"` // primary key
