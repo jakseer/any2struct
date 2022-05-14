@@ -37,4 +37,5 @@ const (
 	String    fieldTypConst = "string"
 	Bool      fieldTypConst = "bool"
 	StructTyp fieldTypConst = "struct"
+	Array     fieldTypConst = "[]interface"
 )
