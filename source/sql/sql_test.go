@@ -30,7 +30,7 @@ func TestSource_Convert(t *testing.T) {
 				Comment: "",
 				Fields: []convert.StructField{
 					{
-						Key: "Id",
+						Key: "id",
 						Typ: convert.FieldTyp{
 							Ptr: nil,
 							Typ: convert.Int,

@@ -1,11 +1,10 @@
 package any2struct
 
 import (
-	"bytes"
 	"errors"
 	"strings"
-	"text/template"
 
+	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
 	template2 "github.com/jakseer/any2struct/template"
 	"github.com/jinzhu/copier"
@@ -35,32 +34,44 @@ var (
 
 	// ErrDecode decode error
 	ErrDecode = errors.New("decode error")
-
-	// ErrLoadTmpl load template
-	ErrLoadTmpl = errors.New("load template")
-
-	// ErrParseTmpl parse template
-	ErrParseTmpl = errors.New("parse template")
 )
 
-// Convert input(which is decodeType struct) to go struct(with encodeTypes tag)
-func Convert(input string, decodeType string, encodeTypes []string) (string, error) {
-	cs, err := parseInput(input, decodeType)
-	if err != nil {
-		return "", err
-	}
+const (
+	defaultTmpPath = "./template/struct.tmpl"
+)
 
-	ts := convertStruct(cs)
-
-	tmplStructs, err := buildTags(ts, encodeTypes)
-	if err != nil {
-		return "", err
-	}
-
-	return parseTemplate(tmplStructs)
+type Convertor struct {
+	classNameExist map[string]struct{} // judge the class name whether has been used
+	classNameMap   map[*convert.Struct]string
+	tmplPath       string
 }
 
-func parseInput(input string, decodeType string) (*convert.Struct, error) {
+func NewConvertor() *Convertor {
+	return &Convertor{
+		classNameMap:   make(map[*convert.Struct]string),
+		classNameExist: make(map[string]struct{}),
+		tmplPath:       defaultTmpPath,
+	}
+}
+
+// Convert input(which is decodeType struct) to go struct(with encodeTypes tag)
+func (c *Convertor) Convert(input string, decodeType string, encodeTypes []string) (string, error) {
+	cs, err := c.parseInput(input, decodeType)
+	if err != nil {
+		return "", err
+	}
+
+	ts := c.convertStruct(cs)
+
+	tmplStructs, err := c.buildTags(ts, encodeTypes)
+	if err != nil {
+		return "", err
+	}
+
+	return c.parseWithTemp(tmplStructs)
+}
+
+func (c *Convertor) parseInput(input string, decodeType string) (*convert.Struct, error) {
 	var decoder source.Source
 	switch decodeType {
 	case DecodeTypeSQL:
@@ -80,7 +91,7 @@ func parseInput(input string, decodeType string) (*convert.Struct, error) {
 	return s, nil
 }
 
-func buildTags(input []*template2.Struct, encodeTypes []string) ([]*template2.Struct, error) {
+func (c *Convertor) buildTags(input []*template2.Struct, encodeTypes []string) ([]*template2.Struct, error) {
 	var encoders []destination.Destination
 	for _, v := range encodeTypes {
 		switch v {
@@ -104,11 +115,12 @@ func buildTags(input []*template2.Struct, encodeTypes []string) ([]*template2.St
 }
 
 // convertStruct convert *convert.Struct to []*template2.Struct. Spreading multi-level struct to one-level array
-func convertStruct(input *convert.Struct) []*template2.Struct {
+func (c *Convertor) convertStruct(input *convert.Struct) []*template2.Struct {
 	var ret []*template2.Struct
 
 	var needProcessStructList []*convert.Struct
 	needProcessStructList = append(needProcessStructList, input)
+	c.registerClassName(input)
 
 	for len(needProcessStructList) > 0 {
 		// pop from queue
@@ -119,8 +131,11 @@ func convertStruct(input *convert.Struct) []*template2.Struct {
 		for _, field := range s.Fields {
 			typString := string(field.Typ.Typ)
 
-			// push nested struct into queue for subsequent process
+			// rename and push nested struct into queue for subsequent process
 			if field.Typ.Typ == convert.StructTyp && field.Typ.Ptr != nil {
+				c.registerClassName(field.Typ.Ptr)
+				typString, _ = c.classNameMap[field.Typ.Ptr]
+				field.Typ.Ptr.Name = typString
 				needProcessStructList = append(needProcessStructList, field.Typ.Ptr)
 			}
 
@@ -131,8 +146,8 @@ func convertStruct(input *convert.Struct) []*template2.Struct {
 			}
 
 			fieldList = append(fieldList, template2.StructField{
-				Key:     field.Key,
-				Typ:     typString,
+				Key:     strcase.ToCamel(field.Key),
+				Typ:     strcase.ToCamel(typString),
 				Tags:    tagList,
 				Comment: field.Comment,
 			})
@@ -140,7 +155,7 @@ func convertStruct(input *convert.Struct) []*template2.Struct {
 
 		// copy whole struct
 		ret = append(ret, &template2.Struct{
-			Name:    s.Name,
+			Name:    strcase.ToCamel(s.Name),
 			Comment: s.Comment,
 			Fields:  fieldList,
 		})
@@ -149,22 +164,29 @@ func convertStruct(input *convert.Struct) []*template2.Struct {
 	return ret
 }
 
-// parseTemplate
-func parseTemplate(ss []*template2.Struct) (string, error) {
+// registerClassName mark used class name to avoid duplicated class name
+func (c *Convertor) registerClassName(p *convert.Struct) {
+	className := strcase.ToCamel(p.Name)
+
+	_, ok := c.classNameExist[className]
+	for ; ok; _, ok = c.classNameExist[className] {
+		// if duplicated, rename it with _1 postfix
+		className = className + "_1"
+	}
+	c.classNameMap[p] = className
+	c.classNameExist[className] = struct{}{}
+}
+
+// parseWithTemp generate Go Struct
+func (c *Convertor) parseWithTemp(ss []*template2.Struct) (string, error) {
 	tmplResp := make([]string, len(ss))
 	for _, s := range ss {
-		tmpl, err := template.ParseFiles("./template/struct.tmpl")
+		resp, err := s.ParseWithTmpl(c.tmplPath)
 		if err != nil {
-			return "", ErrLoadTmpl
+			return "", err
 		}
 
-		b := bytes.Buffer{}
-		err = tmpl.Execute(&b, s)
-		if err != nil {
-			return "", ErrParseTmpl
-		}
-
-		tmplResp = append(tmplResp, b.String())
+		tmplResp = append(tmplResp, resp)
 	}
 
 	ret := strings.Join(tmplResp, "\n")
