@@ -16,7 +16,7 @@ Support output Go Struct Tag
 
 ## Usage
 ```
-Convert(input string, decodeType string, encodeTypes []string) (string, error)
+func (*Convertor) Convert(input string, decodeType string, encodeTypes []string) (string, error)
 ```
 Parse `input` which is `decodeType` type into Go Struct with `encodeTypes` tags.
 
@@ -31,7 +31,7 @@ Parse `input` which is `decodeType` type into Go Struct with `encodeTypes` tags.
 	sql = sql + ")ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='user table';" + "\n"
     
 	// parse json to go struct with tag gorm and json
-	out, err := Convert(sql, DecodeTypeJson, []string{EncodeTypeJson, EncodeTypeGorm})
+	out, err := NewConvertor().Convert(sql, DecodeTypeJson, []string{EncodeTypeJson, EncodeTypeGorm})
 	if err != nil {
 		fmt.Println(out)
 	}
