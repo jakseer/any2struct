@@ -5,7 +5,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
 )
 
@@ -103,7 +102,7 @@ func parseJSONField(key string, val interface{}) (*convert.StructField, error) {
 		return nil, ErrInvalidJSONType
 	}
 	return &convert.StructField{
-		Key: strcase.ToCamel(key),
+		Key: key,
 		Typ: fieldType,
 	}, nil
 }
