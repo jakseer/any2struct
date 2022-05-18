@@ -25,7 +25,7 @@ type fieldTypConst string
 
 // FieldTyp is the struct field type
 type FieldTyp struct {
-	Ptr *Struct
+	Ptr *Struct // if typ is struct, ptr point the struct; otherwise nil
 	Typ fieldTypConst
 }
 
