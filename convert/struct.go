@@ -25,7 +25,7 @@ type fieldTypConst string
 
 // FieldTyp is the struct field type
 type FieldTyp struct {
-	Ptr *Struct
+	Ptr *Struct // if typ is struct, ptr point the struct; otherwise nil
 	Typ fieldTypConst
 }
 
@@ -37,4 +37,5 @@ const (
 	String    fieldTypConst = "string"
 	Bool      fieldTypConst = "bool"
 	StructTyp fieldTypConst = "struct"
+	Array     fieldTypConst = "[]interface"
 )

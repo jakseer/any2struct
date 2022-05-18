@@ -6,15 +6,13 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"github.com/jakseer/any2struct/convert"
-	template2 "github.com/jakseer/any2struct/template"
-	"github.com/jinzhu/copier"
-
 	"github.com/jakseer/any2struct/destination"
 	"github.com/jakseer/any2struct/destination/gorm"
 	"github.com/jakseer/any2struct/destination/json"
 	"github.com/jakseer/any2struct/source"
 	json2 "github.com/jakseer/any2struct/source/json"
 	"github.com/jakseer/any2struct/source/sql"
+	template2 "github.com/jakseer/any2struct/template"
 )
 
 const (
@@ -71,6 +69,7 @@ func (c *Convertor) Convert(input string, decodeType string, encodeTypes []strin
 	return c.parseWithTemp(tmplStructs)
 }
 
+// parseInput parse input with decodeType decoder
 func (c *Convertor) parseInput(input string, decodeType string) (*convert.Struct, error) {
 	var decoder source.Source
 	switch decodeType {
@@ -91,6 +90,7 @@ func (c *Convertor) parseInput(input string, decodeType string) (*convert.Struct
 	return s, nil
 }
 
+// buildTags generate tags according encodeTypes
 func (c *Convertor) buildTags(input []*template2.Struct, encodeTypes []string) ([]*template2.Struct, error) {
 	var encoders []destination.Destination
 	for _, v := range encodeTypes {
@@ -114,7 +114,8 @@ func (c *Convertor) buildTags(input []*template2.Struct, encodeTypes []string) (
 	return input, nil
 }
 
-// convertStruct convert *convert.Struct to []*template2.Struct. Spreading multi-level struct to one-level array
+// convertStruct convert *convert.Struct to []*template2.Struct.
+// Spreading multi-level struct to one-level array, but not copy tags
 func (c *Convertor) convertStruct(input *convert.Struct) []*template2.Struct {
 	var ret []*template2.Struct
 
@@ -133,22 +134,20 @@ func (c *Convertor) convertStruct(input *convert.Struct) []*template2.Struct {
 
 			// rename and push nested struct into queue for subsequent process
 			if field.Typ.Typ == convert.StructTyp && field.Typ.Ptr != nil {
+				// generate unique class name and get it
 				c.registerClassName(field.Typ.Ptr)
 				typString, _ = c.classNameMap[field.Typ.Ptr]
+
+				// typString should be camel format because it is also class name
+				typString = strcase.ToCamel(typString)
+
 				field.Typ.Ptr.Name = typString
 				needProcessStructList = append(needProcessStructList, field.Typ.Ptr)
 			}
 
-			// copy tag list
-			var tagList []template2.StructFieldTag
-			if err := copier.Copy(&tagList, &field.Tags); err != nil {
-				continue
-			}
-
 			fieldList = append(fieldList, template2.StructField{
 				Key:     strcase.ToCamel(field.Key),
-				Typ:     strcase.ToCamel(typString),
-				Tags:    tagList,
+				Typ:     typString,
 				Comment: field.Comment,
 			})
 		}
@@ -164,7 +163,7 @@ func (c *Convertor) convertStruct(input *convert.Struct) []*template2.Struct {
 	return ret
 }
 
-// registerClassName mark used class name to avoid duplicated class name
+// registerClassName  register struct ptr, it will generate unique class name with it
 func (c *Convertor) registerClassName(p *convert.Struct) {
 	className := strcase.ToCamel(p.Name)
 

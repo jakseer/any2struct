@@ -36,8 +36,6 @@ func (s Source) Convert(str string) (*convert.Struct, error) {
 		return nil, err
 	}
 
-	// 判断是数组还是struct，然后
-
 	ss, err := parseJSONStruct(m)
 	if err != nil {
 		return nil, err
@@ -86,7 +84,9 @@ func parseJSONField(key string, val interface{}) (*convert.StructField, error) {
 			Typ: convert.Bool,
 		}
 	case []interface{}:
-		return nil, ErrInvalidJSONType
+		fieldType = convert.FieldTyp{
+			Typ: convert.Array,
+		}
 	case map[string]interface{}:
 		s, err := parseJSONStruct(val.(map[string]interface{}))
 		s.Name = key
