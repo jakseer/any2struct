@@ -12,12 +12,15 @@ import (
 	"github.com/jakseer/any2struct/source"
 	json2 "github.com/jakseer/any2struct/source/json"
 	"github.com/jakseer/any2struct/source/sql"
+	"github.com/jakseer/any2struct/source/yaml"
+
 	template2 "github.com/jakseer/any2struct/template"
 )
 
 const (
 	DecodeTypeSQL  string = "decode_sql"
 	DecodeTypeJSON string = "decode_json"
+	DecodeTypeYaml string = "decode_yaml"
 
 	EncodeTypeJSON string = "encode_json"
 	EncodeTypeGorm string = "encode_gorm"
@@ -77,6 +80,8 @@ func (c *Convertor) parseInput(input string, decodeType string) (*convert.Struct
 		decoder = sql.New()
 	case DecodeTypeJSON:
 		decoder = json2.New()
+	case DecodeTypeYaml:
+		decoder = yaml.New()
 	default:
 		return nil, ErrInvalidDecodeType
 	}
