@@ -23,6 +23,10 @@ type StructFieldTag struct {
 
 type fieldTypConst string
 
+func (ftc fieldTypConst) String() string {
+	return string(ftc)
+}
+
 // FieldTyp is the struct field type
 type FieldTyp struct {
 	Ptr *Struct // if typ is struct, ptr point the struct; otherwise nil
