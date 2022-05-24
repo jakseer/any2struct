@@ -9,6 +9,7 @@ import (
 	"github.com/jakseer/any2struct/destination"
 	"github.com/jakseer/any2struct/destination/gorm"
 	"github.com/jakseer/any2struct/destination/json"
+	yaml2 "github.com/jakseer/any2struct/destination/yaml"
 	"github.com/jakseer/any2struct/source"
 	json2 "github.com/jakseer/any2struct/source/json"
 	"github.com/jakseer/any2struct/source/sql"
@@ -24,6 +25,7 @@ const (
 
 	EncodeTypeJSON string = "encode_json"
 	EncodeTypeGorm string = "encode_gorm"
+	EncodeTypeYaml string = "encode_yaml"
 )
 
 var (
@@ -104,6 +106,8 @@ func (c *Convertor) buildTags(input []*template2.Struct, encodeTypes []string) (
 			encoders = append(encoders, json.New())
 		case EncodeTypeGorm:
 			encoders = append(encoders, gorm.New())
+		case EncodeTypeYaml:
+			encoders = append(encoders, yaml2.New())
 		default:
 			return nil, ErrInvalidEncodeType
 		}
