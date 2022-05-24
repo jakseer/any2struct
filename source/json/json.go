@@ -89,11 +89,11 @@ func parseJSONField(key string, val interface{}) (*convert.StructField, error) {
 		}
 	case map[string]interface{}:
 		s, err := parseJSONStruct(val.(map[string]interface{}))
-		s.Name = key
 		if err != nil {
 			return nil, ErrInvalidJSONNestedStructure
 		}
 
+		s.Name = key
 		fieldType = convert.FieldTyp{
 			Ptr: s,
 			Typ: convert.StructTyp,
