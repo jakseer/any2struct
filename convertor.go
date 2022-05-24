@@ -139,7 +139,7 @@ func (c *Convertor) convertStruct(input *convert.Struct) []*template2.Struct {
 
 		var fieldList []template2.StructField
 		for _, field := range s.Fields {
-			typString := string(field.Typ.Typ)
+			typString := field.Typ.Typ.String()
 
 			// rename and push nested struct into queue for subsequent process
 			if field.Typ.Typ == convert.StructTyp && field.Typ.Ptr != nil {
