@@ -19,13 +19,13 @@ import (
 )
 
 const (
-	DecodeTypeSQL  string = "decode_sql"
-	DecodeTypeJSON string = "decode_json"
-	DecodeTypeYaml string = "decode_yaml"
+	DecodeTypeSQL  string = "sql"
+	DecodeTypeJSON string = "json"
+	DecodeTypeYaml string = "yaml"
 
-	EncodeTypeJSON string = "encode_json"
-	EncodeTypeGorm string = "encode_gorm"
-	EncodeTypeYaml string = "encode_yaml"
+	EncodeTypeJSON string = "json"
+	EncodeTypeGorm string = "gorm"
+	EncodeTypeYaml string = "yaml"
 )
 
 var (
