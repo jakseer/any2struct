@@ -21,6 +21,9 @@ var (
 
 	// inputPath input file path. read data from stdin if inputPath is omitted
 	inputPath string
+
+	// outputPath output file path. output to stdout if outputPath is omitted
+	outputPath string
 )
 
 var CmdGenerate = &cobra.Command{
@@ -43,6 +46,7 @@ func init() {
 	CmdGenerate.Flags().StringVarP(&inputType, "data-type", "d", "", "input data type, support: yaml,json,sql")
 	CmdGenerate.Flags().StringVarP(&outputTags, "tags", "t", "", "generated struct tags, support: json,gorm,yaml")
 	CmdGenerate.Flags().StringVarP(&inputPath, "input", "i", "", "input file path")
+	CmdGenerate.Flags().StringVarP(&outputPath, "output", "o", "", "output file path")
 
 	_ = CmdGenerate.MarkFlagRequired("data-type")
 }
@@ -100,7 +104,26 @@ func run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(out)
+	// check and output
+	if outputPath != "" {
+		fp, err := os.Create(outputPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer fp.Close()
+		_, err = fp.WriteString(out)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err = fp.Sync(); err != nil {
+			log.Fatal(err)
+		}
+
+		return
+	}
+
+	fmt.Print(out)
 }
 
 func strInArray(str string, arr []string) bool {
