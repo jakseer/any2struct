@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/jakseer/any2struct/cmd/internal/generate"
+	"github.com/jakseer/any2struct/cmd/any2struct/internal/generate"
+
 	"github.com/spf13/cobra"
 )
 
