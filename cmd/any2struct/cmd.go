@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/jakseer/any2struct/cmd/any2struct/internal/generate"
 	"log"
+
+	"github.com/jakseer/any2struct/cmd/any2struct/internal/generate"
 
 	"github.com/spf13/cobra"
 )
