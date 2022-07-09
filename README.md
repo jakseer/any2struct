@@ -30,6 +30,11 @@ Flags:
   -t, --tags string        generated struct tags, support: json,gorm,yaml
 ```
 #### Example
+Install any2struct cli firstly.
+```text
+go install github.com/jakseer/any2struct/cmd/any2struct@latest
+```
+Then use it.
 ```shell
 any2struct generate -d json "{\"a\":1,\"b\":[1,2,\"b\"],\"c\":{\"c1\":1,\"c2\":[1,2]}}" -t=json,yaml
 ```
