@@ -1,3 +1,8 @@
+package template
+
+import "fmt"
+
+var tmplContent = fmt.Sprint(`
 {{- /* struct-template */ -}}
 {{if .Comment -}} // {{.Name}} {{.Comment}} {{- end}}
 type {{.Name}} struct { {{range .Fields}}
@@ -8,9 +13,9 @@ type {{.Name}} struct { {{range .Fields}}
 {{- /* tags-template */ -}}
 {{define "tags" -}}
 {{if . -}}
-`{{range $i, $v := . -}}
-{{if ne $i 0}} {{end -}}
-{{$v.Typ}}:"{{$v.Content}}"
-{{- end}}`
-{{- end}}
-{{- end}}
+` + "`{{range $i, $v := . -}}\n" +
+	"{{if ne $i 0}} {{end -}}\n" +
+	"{{$v.Typ}}:\"{{$v.Content}}\"\n" +
+	"{{- end}}`\n" +
+	"{{- end}}\n" +
+	"{{- end}}")

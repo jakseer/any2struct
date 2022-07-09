@@ -37,7 +37,7 @@ var (
 
 // ParseWithTmpl parse struct with template
 func (s *Struct) ParseWithTmpl(tmplPath string) (string, error) {
-	tmpl, err := template.ParseFiles(tmplPath)
+	tmpl, err := template.New("tmpl").Parse(tmplContent)
 	if err != nil {
 		return "", ErrLoadTmpl
 	}
